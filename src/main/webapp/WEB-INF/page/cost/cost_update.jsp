@@ -1,0 +1,72 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<base href="<%=basePath%>">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>费用修改</title>
+<link rel="stylesheet" href="res/css/bootstrap.css">
+<script type="text/javascript" src="res/js/jquery.min.js"></script>
+<script type="text/javascript" src="res/js/bootstrap.min.js"></script>
+</head>
+<body>
+	<div style="padding: 0px; margin: 0px;">
+		<ul class="breadcrumb" style="margin: 0px; padding-left: 20px;">
+			<li>系统管理</li>
+			<li>费用管理</li>
+			<li>修改费用>
+		</ul>
+	</div>
+	<!-- 通过为表单添加 .form-horizontal 类，并联合使用 Bootstrap 预置的栅格类，
+	可以将 label 标签和控件组水平并排布局。这样做将改变 .form-group 的行为，
+	使其表现为栅格系统中的行（row），因此就无需再额外添加 .row 了。 -->
+	<!--  jsp显示页面思路思考：
+		1. 页面显示后端传出的费用信息数据，通过jstl进行接收显示
+		2.
+	
+	-->
+	<form action="cost/update.do" method="post" class="form-horizontal"
+	data-validator-option='{stopOnError:true ,theme:"yellow_right"}'>
+	<input type="hidden" name="costId" value="${cost.costId}"/>
+		<h5 class="page-header alert-info" style="margin:0px; padding:10px;margin-bottom:10px">费用基本信息</h5>
+		<div class="row">
+			<div class="col-sm-7">
+				<div class="form-group">
+					<label class="col-sm-3 control-label">费用名称</label>
+					<div class="col-sm-9">
+						<input type="text" class="form-control" name="costName" 
+						data-rule=费用名称:required; placeholder="请输入费用名称" value="${cost.costName }" >
+						
+					</div>
+				</div>
+			</div>
+			
+			<div class="col-sm-7">
+				<div class="form-group">
+					<label class="col-sm-3 control-label">费用描述</label>
+					<div class="col-sm-9">
+						<textarea rows="" cols="" class="form-control" name="costDesc"
+						data-rule=费用描述:required; placeholder="请输入费用描述" >${cost.costDesc}</textarea>
+					</div>
+				</div>
+			</div>
+		<!-- 添加费用与返回上一级按钮， -->	
+		</div>
+			<div class="row">
+				<div class="col-sm-7" align="center">
+					<input type="submit" value="保存修改" class="btn btn-success">
+					<a href="cost/list.do" class="btn btn-danger">返回上一级</a>
+				</div>
+			</div>
+	</form>
+	
+
+</body>
+</html>

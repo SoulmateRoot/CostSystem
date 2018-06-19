@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bfw.dao.ICostInfoDAO">
+	<!-- 结果集映射 -->
+	<resultMap type="CostInfo" id="Costmap">
+		<id property="costId" column="cost_id" />
+		<result property="costName" column="cost_name" />
+		<result property="costDesc" column="cost_desc" />
+		<result property="costMark" column="cost_mark" />
+	</resultMap>
+
+	<!-- 添加费用信息 -->
+	<insert id="add" parameterType="CostInfo">
+		insert into cost_info
+		(cost_name,cost_desc,cost_mark)
+		values(#{costName},#{costDesc},#{costMark})
+	</insert>
+	
+	
+	<!-- 查询费用列表并分页 -->
+	<select id="list" parameterType="CostInfo" resultMap="Costmap">
+		<!-- 查询所有费用信息，调教为标识 -->
+		select * from cost_info where cost_mark=#{costMark}
+		<if test="costName!=null and costName!=''">
+			<!-- 根据费用名称进行模糊查询 -->
+			and cost_name like #{costName}
+		</if>
+			<!-- 依据id 进行降序排序-->
+			order by cost_id desc
+		<if test="start!=-1">
+				<!-- 分页查询，显示当前页数与条数量 -->
+				limit #{start}#{length}
+		</if>
+	</select>
+	<!-- 总记录数 -->
+	<select id="getcount" parameterType="CostInfo" resultType="Long">
+		select count(1) from cost_info where cost_mark=#{costMark}
+		<if test="costName!=null and costName!=''">
+			and cost_name like #{costName}
+		</if>
+	</select>
+	
+	<!-- 加载费用信息更新页面 -->
+	<select id="getinfo" parameterType="CostInfo" resultMap="Costmap">
+		select * from cost_info where cost_id=#{costId}
+	</select>
+	<!-- 更新费用信息语句 -->
+	<update id="update" parameterType="CostInfo" >
+		update cost_info
+		<set>
+			<if test="costName!=null">
+				cost_name=#{costName},
+			</if>
+			<if test="costDesc!=null">
+				cost_desc=#{costDesc},
+			</if>
+			<if test="costMark!=null">
+				cost_mark=#{costMark},
+			</if>
+		</set>
+		 	where cost_id= #{costId}
+	</update>
+	
+	
+</mapper>

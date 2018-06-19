@@ -1,0 +1,58 @@
+SSM（springmvc+spring+mybatis）整合:
+1.配置web.xml，配置spring
+	<!-- spring配置文件 -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:application-context.xml</param-value>
+	</context-param>
+	<!-- spring监听器 -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+2. 创建anotation.xml 
+	   <!-- spring扫描 -->
+		<context:component-scan base-package="com.bfw">
+			<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+		</context:component-scan>
+3.配置连接池 先创建jdbc.properties
+	driverClass=com.mysql.jdbc.Driver
+	jdbcUrl=jdbc:mysql://localhost:3306/shop?characterEncoding=UTF-8
+	user=root
+	password=
+在创建jdbc.xml,配置c3p0数据库连接池
+<!-- c3p0 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${driverClass}"></property>
+		<property name="jdbcUrl" value="${jdbcUrl}"></property>
+		<property name="user" value="${user}"></property>
+		<property name="password" value="${password}"></property>
+	</bean>	
+4. 创建property.xml		
+		<!-- 读取jdbc配置 -->
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<!-- jdbc配置 -->
+				<value>classpath:properties/jdbc.properties</value>
+			</list>
+		</property>
+	</bean>
+5.配置mybatis.xml	
+	<!-- mybatis SqlSessionFactory配置 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="mapperLocations" value="classpath:com/bfw/dao/*.xml"></property>
+		<property name="typeAliasesPackage" value="com.bfw.bean"></property>
+	</bean>
+	<!-- 扫包 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.bfw.dao" />
+	</bean>
+6. 配置transation.xml
+	<!-- spring事务 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<!-- 开启注解事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager"/>	
