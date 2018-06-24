@@ -84,6 +84,27 @@
 		where a.cost_id = b.cost_id and
 		a.expense_id=#{expenseId}
 	</select>
+	<!--  -->
+	<select id="getLit" parameterType="ExpenseAccount" resultMap="eamap">
+		select x.*,y.* from expense_account x,user_info y where expense_id in
+		(
+		select a.expense_id
+		from
+		audit_history a,user_info b where
+		a.user_id=b.user_id
+		and a.user_id=#{userId}
+		) and x.user_id = y.user_id
+		<if test="userName!=null and userName!=''">
+			and y.user_name like #{userName}
+		</if>
+		<if test="expenseTime!=null and expenseTime!=''">
+			and x.expense_time = #{expenseTime}
+		</if>
+			order by x.expense_id desc
+		<if test="start!=-1">
+			limit #{start},#{length}
+		</if>
+	</select>
 	<!-- 添加历史记录 -->
 	<insert id="addAuditHistory" parameterType="AuditHistory">
 		insert into
@@ -109,4 +130,13 @@
 		</set>
 			where expense_id=#{expenseId}
 	</update>
+	<!-- 查询审核历史记录 -->
+	<select id="getAuditHistoryList" parameterType="ExpenseAccount" resultType="Map">
+		select a.*,u.user_name
+		from
+		audit_history a,user_info u
+		where
+		a.user_id=u.user_id and a.expense_id=#{expenseId}
+		
+	</select>
 </mapper>

@@ -41,21 +41,24 @@ static final也可以修饰方法，表示该方法不能重写，可以在不new对象的情况下调用
 	 */
 	
 	
-	//有效
+	//有效数据
 	public final static String MARK_YES="1";
-	//无效
+	//无效数据
 	public static final String MARK_NO="0";
-	
 	
 	//报销单状态 
 	//报销单初始状态
 	public final static String EXPENSE_STATE_ZERO="0";
-	//部门经理审核
+	//等待部门经理审核
 	public final static String EXPENSE_STATE_ONE="1";
 	//部门经理审核不通过
 	public final static String EXPENSE_STATE_REONE="-1";
-	//部门经理审核通过，财务经理审核
+	//部门经理审核通过，等待财务经理审核
 	public final static String EXPENSE_STATE_TWO="2";
+	//财务审核不通过
+	public final static String EXPENSE_STATE_RETWO="-2";
+	//财务经理审核通过,报销单审核完成
+	public final static String EXPENSE_STATE_OK="3";
 	//报销单作废
 	public final static String EXPENSE_STATE_DELETE="del";
 

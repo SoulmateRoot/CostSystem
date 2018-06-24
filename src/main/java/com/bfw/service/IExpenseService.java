@@ -84,5 +84,24 @@ public interface IExpenseService {
 	 * @throws
 	 */
 	public void auditManager(AuditHistory ah);
+	/**
+	 * @Title: getAuditHistoryList  
+	 * @Description: 查询审核历史记录 
+	 * @param ea
+	 * @return 返回     
+	 * @return List<Map>    
+	 * @throws
+	 */
+	public List<Map> getAuditHistoryList(ExpenseAccount ea);
+	
+	/**
+	 * @Title: getLit  
+	 * @Description: 根据审核人进行查询报销单 
+	 * @param ea
+	 * @return      
+	 * @return List<ExpenseAccount>    
+	 * @throws
+	 */
+	public List<ExpenseAccount>  getLit(ExpenseAccount ea);
 }
 

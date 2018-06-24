@@ -104,7 +104,7 @@ public class ExpenseController extends Page{
 		}
 		try{
 			expenseservice.add(ea, costId, expenseDetailsSmount);
-			model.addAttribute("erroinfo","报销提交成功，请等待审核");
+			model.addAttribute("errorinfo","报销提交成功，请等待审核");
 		}catch(Exception e){
 			e.printStackTrace();
 			model.addAttribute("errorinfo", "报销单提交失败");
@@ -167,7 +167,9 @@ public class ExpenseController extends Page{
 		model.addAttribute("list",list);
 		return "expense/expense_manager";
 	}
-	
+	/*
+	 * 部门经理    提交审核信息
+	 */
 	@RequestMapping("auditManager.do")
 	public String auditManager(AuditHistory ah,Model model,HttpServletRequest request,HttpSession session){
 		//拿到当前用户
@@ -178,7 +180,7 @@ public class ExpenseController extends Page{
 		}
 		try {
 			expenseservice.auditManager(ah);
-			model.addAttribute("errerinfo","报销单审核成功");
+			model.addAttribute("errorinfo","报销单审核成功");
 		} catch (Exception e) {
 			e.printStackTrace();
 			model.addAttribute("errorinfo","报销单审核失败");
@@ -189,13 +191,32 @@ public class ExpenseController extends Page{
 	
 	/**
 	 * @Title: loadAuditFinance  
-	 * @Description: 财务审核页面
+	 * @Description: 财务审核页面  查询出待审核报销单
 	 * @return      
 	 * @return String    
 	 * @throws
 	 */
 	@RequestMapping("loadAuditFinance.do")
-	public String loadAuditFinance(){
+	public String loadAuditFinance(ExpenseAccount ea,Model model,HttpServletRequest request){
+		//if语句判断是否为空
+		if(ea==null){
+			//为空则new一个对象
+			ea=new ExpenseAccount();
+		}
+		//进行分页信息设置
+		//审核状态设置
+		ea.setExpenseState(Comm.EXPENSE_STATE_TWO);
+		//设置分页信息
+		this.initPage(request);
+		//起始记录
+		ea.setStart(this.getPageNo());
+		//每页显示的记录数量
+		ea.setLength(PAGE_NUM_BIG);
+		//报销信息列表
+		model.addAttribute("list", expenseservice.list(ea));
+		// 总记录数
+		model.addAttribute("total", expenseservice.getcount(ea));
+		//页面返回
 		return "expense/expense_audit_finance";
 	}
 	
@@ -207,11 +228,38 @@ public class ExpenseController extends Page{
 	 * @throws
 	 */
 	@RequestMapping("loadFinance.do")
-	public String loadFinance(){
-		
+	public String loadFinance(ExpenseAccount ea,Model model){
+		//根据编号查询报销单
+		ExpenseAccount exp= expenseservice.getExpenseAccount(ea);
+		//根据编号查询报销单明细
+		List<Map> list = expenseservice.getExpenseDetailsList(ea);
+		//根据编号查询报销单审核历史记录
+		List<Map> HistoryList=expenseservice.getAuditHistoryList(ea);
+		model.addAttribute("exp",exp);
+		model.addAttribute("list",list);
+		model.addAttribute("HistoryList",HistoryList);
 		return "expense/expense_finance";
 	}
-	
+	/*
+	 * 财务审核提交
+	 */
+	@RequestMapping("auditFinance.do")
+	public String auditFinance(AuditHistory ah,Model model,HttpServletRequest request,HttpSession session){
+		//拿到当前用户
+		UserInfo user=(UserInfo) session.getAttribute("user");
+		//判断是否为空
+		if(ah!=null){
+			ah.setUserId(user.getUserId());
+		}
+		try {
+			expenseservice.auditManager(ah);
+			model.addAttribute("errorinfo","报销单审核成功");
+		} catch (Exception e) {
+			e.printStackTrace();
+			model.addAttribute("errorinfo","报销单审核失败");
+		}
+		return loadAuditFinance(null,model,request);
+	}
 	/**
 	 * @Title: mylist  
 	 * @Description:我的报销单
@@ -220,7 +268,29 @@ public class ExpenseController extends Page{
 	 * @throws
 	 */
 	@RequestMapping("mylist.do")
-	public String mylist(){
+	public String mylist(HttpSession session,ExpenseAccount ea,Model model,HttpServletRequest request){
+		//拿到当前用户
+		UserInfo user=(UserInfo) session.getAttribute("user");
+		//if语句判断是否为空
+		if(ea!=null){
+			ea=new ExpenseAccount();
+			
+		}
+		//进行分页信息设置
+		//审核状态设置
+		//ea.setExpenseState(Comm.EXPENSE_STATE_TWO);
+		//设置分页信息
+		ea.setUserId(user.getUserId());
+		this.initPage(request);
+		//起始记录
+		ea.setStart(this.getPageNo());
+		//每页显示的记录数量
+		ea.setLength(PAGE_NUM_BIG);
+		//报销信息列表
+		model.addAttribute("list", expenseservice.list(ea));
+		// 总记录数
+		model.addAttribute("total", expenseservice.getcount(ea));
+		//页面返回
 		return "expense/expense_mylist";
 	}
 	
@@ -232,7 +302,16 @@ public class ExpenseController extends Page{
 	 * @throws
 	 */
 	@RequestMapping("myshow.do")
-	public String myshow(){
+	public String myshow(ExpenseAccount ea,Model model){
+		//根据编号查询报销单
+		ExpenseAccount exp= expenseservice.getExpenseAccount(ea);
+		//根据编号查询报销单明细
+		List<Map> list = expenseservice.getExpenseDetailsList(ea);
+		//根据编号查询报销单审核历史记录
+		List<Map> HistoryList=expenseservice.getAuditHistoryList(ea);
+		model.addAttribute("exp",exp);
+		model.addAttribute("list",list);
+		model.addAttribute("HistoryList",HistoryList);
 		return "expense/expense_myshow";
 	}
 	/**
@@ -243,23 +322,46 @@ public class ExpenseController extends Page{
 	 * @throws
 	 */
 	@RequestMapping("list.do")
-	public String list(){
+	public String list(HttpSession session,ExpenseAccount ea,Model model,HttpServletRequest request){
+		if (ea == null) {
+			ea = new ExpenseAccount();
+		}
+		// 分页信息
+		this.initPage(request);
+		// 起始记录
+		ea.setStart(this.getPageNo());
+		// 每页显示记录数
+		ea.setLength(PAGE_NUM_BIG);
+		model.addAttribute("list", expenseservice.list(ea));
+		// 总记录数
+		model.addAttribute("total", expenseservice.getcount(ea));
+
 		return "expense/expense_list";
 	}
 	
 	/**
 	 * @Title: show  
-	 * @Description: 报销单明细 
+	 * @Description: 报销单列表查询明细 
 	 * @return      
 	 * @return String    
 	 * @throws
 	 */
 	@RequestMapping("show.do")
-	public String show(){
+	public String show(ExpenseAccount ea,Model model){
+		//根据编号查询报销单
+		ExpenseAccount exp= expenseservice.getExpenseAccount(ea);
+		//根据编号查询报销单明细
+		List<Map> list = expenseservice.getExpenseDetailsList(ea);
+		//根据编号查询报销单审核历史记录
+		List<Map> HistoryList=expenseservice.getAuditHistoryList(ea);
+		model.addAttribute("exp",exp);
+		model.addAttribute("list",list);
+		model.addAttribute("HistoryList",HistoryList);
 		return "expense/expense_show";
 	}
 
 	/**
+	 * @param request 
 	 * @Title: myauditlist  
 	 * @Description: 我的审核列表 
 	 * @return      
@@ -267,7 +369,21 @@ public class ExpenseController extends Page{
 	 * @throws
 	 */
 	@RequestMapping("myauditlist.do")
-	public String myauditlist(){
+	public String myauditlist(ExpenseAccount ea,Model model,HttpSession session, HttpServletRequest request){
+		if(ea==null){
+			ea= new ExpenseAccount();
+		}
+		//初始化分页
+		this.initPage(request);
+		//起始页
+		ea.setStart(this.getPageNo());
+		//每页显示记录数
+		ea.setLength(PAGE_NUM_BIG);
+		//拿到当前用户
+		UserInfo user=(UserInfo)session.getAttribute("user");
+		ea.setUserId(user.getUserId());
+		model.addAttribute("getLit",expenseservice.getLit(ea));
+		model.addAttribute("total",expenseservice.getcount(ea));
 		return "expense/expense_myauditlist";
 	}
 	
@@ -279,7 +395,17 @@ public class ExpenseController extends Page{
 	 * @throws
 	 */
 	@RequestMapping("myauditshow.do")
-	public String myauditshow(){
+	public String myauditshow(Model model,ExpenseAccount ea){
+		
+		//根据编号查询报销单
+		ExpenseAccount exp= expenseservice.getExpenseAccount(ea);
+		//根据编号查询报销单明细
+		List<Map> list = expenseservice.getExpenseDetailsList(ea);
+		//根据编号查询报销单审核历史记录
+		List<Map> HistoryList=expenseservice.getAuditHistoryList(ea);
+		model.addAttribute("exp",exp);
+		model.addAttribute("list",list);
+		model.addAttribute("HistoryList",HistoryList);
 		return "expense/expense_myauditshow";
 	}
 	

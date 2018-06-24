@@ -119,7 +119,6 @@ public class ExpenseServiceImpl implements IExpenseService {
 		ExpenseAccount ea = new ExpenseAccount();
 		ea.setExpenseId(ah.getExpenseId());
 		
-		
 		//审核不通过
 		if (Comm.EXPENSE_STATE_REONE.equals(ah.getAuditState())) {
 			ea.setExpenseState(Comm.EXPENSE_STATE_ZERO);
@@ -130,10 +129,27 @@ public class ExpenseServiceImpl implements IExpenseService {
 			// 审核通过
 			ea.setExpenseState(ah.getAuditState());
 		}
-		//
+		//添加审核记录
 		expdao.addAuditHistory(ah);
 		// 修改报销单
 		expdao.updateExpenseAccount(ea);
+	}
+	/**
+	 * 
+	 * TODO 财务审核，根据报销单编号查询审核历史记录
+	 * @see com.bfw.service.IExpenseService#getAuditHistoryList(com.bfw.bean.ExpenseAccount)
+	 */
+	public List<Map> getAuditHistoryList(ExpenseAccount ea) {
+		
+		return expdao.getAuditHistoryList(ea);
+	}
+	/**
+	 * 
+	 * TODO 我的审核  根据审核人进行查询报销单.
+	 * @see com.bfw.service.IExpenseService#getLit(com.bfw.bean.ExpenseAccount)
+	 */
+	public List<ExpenseAccount> getLit(ExpenseAccount ea) {
+		return expdao.getLit(ea);
 	}
 
 
